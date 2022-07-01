@@ -4,7 +4,7 @@
 #define RETURN0AND1 0x10
 
 Preprocess::Preprocess()
-  :feature_enabled(0), lidar_type(AVIA), blind(0.01), point_filter_num(1)
+  :feature_enabled(0), lidar_type(AVIA), blind(0.01), point_filter_num(1), max_dist(100.0)
 {
   inf_bound = 10;
   N_SCANS   = 6;
@@ -33,12 +33,13 @@ Preprocess::Preprocess()
 
 Preprocess::~Preprocess() {}
 
-void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num)
+void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num, double max_dst)
 {
   feature_enabled = feat_en;
   lidar_type = lid_type;
   blind = bld;
   point_filter_num = pfilt_num;
+  max_dist = max_dst;
 }
 
 void Preprocess::process(const livox_ros_driver::CustomMsg::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out)
@@ -203,7 +204,7 @@ void Preprocess::oust64_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
     for (uint i = 0; i < plsize; i++)
     {
       double range = pl_orig.points[i].x * pl_orig.points[i].x + pl_orig.points[i].y * pl_orig.points[i].y + pl_orig.points[i].z * pl_orig.points[i].z;
-      if (range < (blind * blind)) continue;
+      if ((range < (blind * blind)) || (range > (max_dist * max_dist))) continue;
       Eigen::Vector3d pt_vec;
       PointType added_pt;
       added_pt.x = pl_orig.points[i].x;
