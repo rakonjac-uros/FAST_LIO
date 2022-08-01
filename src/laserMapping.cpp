@@ -513,9 +513,11 @@ void publish_frame_world(const ros::Publisher & pubLaserCloudFull)
         {
             pcd_index ++;
             string all_points_dir(string(string(ROOT_DIR) + "PCD/scans_") + to_string(pcd_index) + string(".pcd"));
+            string all_points_dir_ascii(string(string(ROOT_DIR) + "PCD/scans_") + to_string(pcd_index) + string("_ascii.pcd"));
             pcl::PCDWriter pcd_writer;
             cout << "current scan saved to /PCD/" << all_points_dir << endl;
             pcd_writer.writeBinary(all_points_dir, *pcl_wait_save);
+            pcd_writer.writeASCII(all_points_dir_ascii, *pcl_wait_save);
             pcl_wait_save->clear();
             scan_wait_num = 0;
         }
@@ -1016,9 +1018,12 @@ int main(int argc, char** argv)
     {
         string file_name = string("scans.pcd");
         string all_points_dir(string(string(ROOT_DIR) + "PCD/") + file_name);
+        string all_points_dir_ascii(string(string(ROOT_DIR) + "PCD/ascii_") + file_name);
         pcl::PCDWriter pcd_writer;
-        cout << "current scan saved to /PCD/" << file_name<<endl;
+        cout << "current scan (binary) saved to /PCD/" << file_name<<endl;
+        cout << "current scan (ascii) saved to /PCD/ascii_" << file_name<<endl;
         pcd_writer.writeBinary(all_points_dir, *pcl_wait_save);
+        pcd_writer.writeASCII(all_points_dir_ascii, *pcl_wait_save);
     }
 
     fout_out.close();

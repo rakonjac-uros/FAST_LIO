@@ -1,0 +1,42 @@
+<launch>
+<!-- Launch file for ouster LiDAR -->
+
+    <arg name="rviz" default="true" />
+    <arg name="os1_driver" default="false" doc="If true, activate os_node."/>
+    <arg name="os1_cloud" default="true" doc="If true, activate os_cloud_node."/>
+
+    <rosparam command="load" file="$(find fast_lio)/config/ouster.yaml" />
+
+    <param name="feature_extract_enable" type="bool" value="0"/>
+    <param name="point_filter_num" type="int" value="2"/>
+    <param name="max_iteration" type="int" value="3" />
+    <param name="filter_size_surf" type="double" value="0.5" />
+    <param name="filter_size_map" type="double" value="0.5" />
+    <param name="cube_side_length" type="double" value="1000" />
+    <param name="runtime_pos_log_enable" type="bool" value="0" />
+    <node pkg="fast_lio" type="fastlio_mapping" name="laserMapping" output="screen" /> 
+
+    <group if="$(arg rviz)">
+    <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find fast_lio)/rviz_cfg/loam_livox.rviz" />
+    </group>
+
+    <group if="$(arg os1_driver)">
+    <node pkg="ouster_ros" name="os_node" type="os_node" output="screen" required="true">
+      <param name="~/replay" value="$(arg use_sim_time)"/>
+      <param name="~/sensor_hostname" value="$(arg sensor_hostname)"/>
+      <param name="~/udp_dest" value="$(arg udp_dest)"/>
+      <param name="~/lidar_port" value="$(arg lidar_port)"/>
+      <param name="~/imu_port" value="0"/>
+      <param name="~/metadata" value="$(arg metadata)"/>
+    </node>
+    </group>
+
+    <group if="$(arg os1_cloud)">
+    <node pkg="ouster_ros" type="os_cloud_node" name="os_cloud_node" output="screen" required="true">
+      <remap from="~/os_config" to="/os_node/os_config"/>
+      <remap from="~/lidar_packets" to="/os_node/lidar_packets"/>
+      <remap from="~/imu_packets" to="/os_node/imu_packets"/>
+    </node>
+    </group>
+
+</launch>
